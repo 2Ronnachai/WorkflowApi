@@ -38,6 +38,18 @@ namespace WorkflowApi.Infrastructure.Repositories
                 .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
         }
 
+        public async Task<WorkflowRoute?> GetCompleteRouteByDocumentTypeAsync(
+            string documentType, 
+            CancellationToken cancellationToken = default)
+        {
+            return await _dbSet
+                .Include(r => r.Steps.OrderBy(s => s.SequenceNo))
+                    .ThenInclude(s => s.Assignments)
+                .Include(r => r.Steps)
+                    .ThenInclude(s => s.ReturnStep)
+                .FirstOrDefaultAsync(r => r.DocumentType == documentType && r.IsActive, cancellationToken);
+        }
+
         public async Task<IEnumerable<WorkflowRoute>> GetActiveRoutesAsync(
             CancellationToken cancellationToken = default)
         {

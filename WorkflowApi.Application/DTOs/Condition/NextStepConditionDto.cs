@@ -1,4 +1,4 @@
-namespace WorkflowApi.Application.DTOs.WorkflowStep
+namespace WorkflowApi.Application.DTOs.Condition
 {
     public class NextStepConditionDto
     {

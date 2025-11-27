@@ -1,3 +1,4 @@
+using WorkflowApi.Application.DTOs.Condition;
 using WorkflowApi.Application.DTOs.WorkflowStepAssignment;
 using WorkflowApi.Domain.Enums;
 
