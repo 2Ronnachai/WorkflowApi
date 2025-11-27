@@ -16,7 +16,6 @@ namespace WorkflowApi.Domain.Entities
         // Organizational Unit-based assignment
         public OUResolutionMode OUResolutionMode { get; set; } = OUResolutionMode.FollowOrigin;
         public int? OrganizationalUnitId { get; set; }
-        public bool AllowFallback { get; set; } = true;
 
         // Specific employee assignment
         public string? NId { get; set; }
