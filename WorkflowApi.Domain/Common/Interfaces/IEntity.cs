@@ -1,4 +1,4 @@
-namespace WorkflowApi.Domain.Common
+namespace WorkflowApi.Domain.Common.Interfaces
 {
     public interface IEntity<TKey>
     {
