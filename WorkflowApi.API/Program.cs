@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using WorkflowApi.Application.Interfaces;
+using WorkflowApi.Domain.Interfaces;
 using WorkflowApi.Infrastructure.Data;
+using WorkflowApi.Infrastructure.Repositories;
 using WorkflowApi.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +31,15 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
+
+// Dependency Injection for repositories and unit of work
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Specific repositories
+builder.Services.AddScoped<IWorkflowRouteRepository, WorkflowRouteRepository>();
+builder.Services.AddScoped<IWorkflowStepRepository, WorkflowStepRepository>();
+builder.Services.AddScoped<IWorkflowStepAssignmentRepository, WorkflowStepAssignmentRepository>();
 
 // Dependency Injection for application services
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
