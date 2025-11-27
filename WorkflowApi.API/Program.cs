@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using WorkflowApi.Application.Interfaces;
+using WorkflowApi.Infrastructure.Data;
+using WorkflowApi.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +11,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 // Database context
-builder.Services.AddDbContext<WorkflowApi.Infrastructure.Data.WorkflowApiDbContext>(options =>
+builder.Services.AddDbContext<WorkflowApiDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
         sqlOptions => sqlOptions.MigrationsAssembly("WorkflowApi.Infrastructure")
@@ -26,6 +29,9 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
+
+// Dependency Injection for application services
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 var app = builder.Build();
 
