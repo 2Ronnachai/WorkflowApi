@@ -1,0 +1,6 @@
+@WorkflowApi.API_HostAddress = http://localhost:5031
+
+GET {{WorkflowApi.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
