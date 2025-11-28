@@ -3,6 +3,7 @@ using WorkflowApi.Application.Interfaces;
 using WorkflowApi.Application.Services;
 using WorkflowApi.Domain.Interfaces;
 using WorkflowApi.Infrastructure.Data;
+using WorkflowApi.Infrastructure.Middleware;
 using WorkflowApi.Infrastructure.Repositories;
 using WorkflowApi.Infrastructure.Services;
 
@@ -23,6 +24,9 @@ builder.Services.AddDbContext<WorkflowApiDbContext>(options =>
 
 builder.Services.AddHttpContextAccessor(); // For ICurrentUserService
 
+// AutoMapper Configuration
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -41,6 +45,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IWorkflowRouteRepository, WorkflowRouteRepository>();
 builder.Services.AddScoped<IWorkflowStepRepository, WorkflowStepRepository>();
 builder.Services.AddScoped<IWorkflowStepAssignmentRepository, WorkflowStepAssignmentRepository>();
+builder.Services.AddScoped<IWorkflowDelegationRepository, WorkflowDelegationRepository>();
 
 // Dependency Injection for application services
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
@@ -65,6 +70,8 @@ if (app.Environment.IsDevelopment())
     app.UseCors();
     app.MapOpenApi();
 }
+
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();

@@ -1,6 +1,7 @@
 // WorkflowRouteService.cs
 using AutoMapper;
 using WorkflowApi.Application.DTOs.WorkflowRoute;
+using WorkflowApi.Application.Exceptions;
 using WorkflowApi.Application.Interfaces;
 using WorkflowApi.Domain.Entities;
 using WorkflowApi.Domain.Interfaces;
@@ -26,7 +27,7 @@ public class WorkflowRouteService(
         
         if (exists)
         {
-            throw new InvalidOperationException(
+            throw new DuplicateException(
                 $"Route '{request.RouteName}' for DocumentType '{request.DocumentType}' already exists");
         }
 
@@ -47,11 +48,8 @@ public class WorkflowRouteService(
         CancellationToken cancellationToken = default)
     {
         // 1. Find existing
-        var route = await _unitOfWork.WorkflowRoutes.GetByIdAsync(id, cancellationToken);
-        if (route == null)
-        {
-            throw new KeyNotFoundException($"WorkflowRoute with Id {id} not found");
-        }
+        var route = await _unitOfWork.WorkflowRoutes.GetByIdAsync(id, cancellationToken) 
+            ?? throw new NotFoundException(nameof(WorkflowRoute), id);
 
         // 2. Check duplicate (exclude current)
         var exists = await _unitOfWork.WorkflowRoutes.IsRouteNameExistsAsync(

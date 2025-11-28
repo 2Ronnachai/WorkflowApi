@@ -1,18 +1,13 @@
-using System.Text.Json;
 using WorkflowApi.Application.DTOs.Condition;
 using WorkflowApi.Application.DTOs.Resolution;
 using WorkflowApi.Application.Interfaces;
 using WorkflowApi.Domain.Entities;
-using WorkflowApi.Domain.Enums;
 using WorkflowApi.Domain.Interfaces;
 
 namespace WorkflowApi.Application.Services
 {
     public static class ResolutionConstants
     {
-        // Delegation
-        public const string DelegatedViaChain = "Delegated via chain";
-        
         // Resolution Method
         public const string DirectAssignment = "DirectAssignment";
         

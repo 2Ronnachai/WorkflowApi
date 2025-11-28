@@ -1,5 +1,6 @@
 using AutoMapper;
 using WorkflowApi.Application.DTOs.WorkflowStepAssignment;
+using WorkflowApi.Application.Exceptions;
 using WorkflowApi.Application.Interfaces;
 using WorkflowApi.Domain.Entities;
 using WorkflowApi.Domain.Interfaces;
@@ -19,7 +20,7 @@ namespace WorkflowApi.Application.Services
         {
             // 1. Check if step exists
             var step = await _unitOfWork.WorkflowSteps.GetByIdAsync(request.StepId, cancellationToken) 
-                ?? throw new KeyNotFoundException($"WorkflowStep with Id {request.StepId} not found");
+                ?? throw new NotFoundException(nameof(WorkflowStep), request.StepId);
 
             // 2. Map to Entity
             var assignment = _mapper.Map<WorkflowStepAssignment>(request);
@@ -41,11 +42,8 @@ namespace WorkflowApi.Application.Services
             CancellationToken cancellationToken = default)
         {
             // 1. Find existing
-            var assignment = await _unitOfWork.WorkflowStepAssignments.GetByIdAsync(id, cancellationToken);
-            if (assignment == null)
-            {
-                throw new KeyNotFoundException($"WorkflowStepAssignment with Id {id} not found");
-            }
+            var assignment = await _unitOfWork.WorkflowStepAssignments.GetByIdAsync(id, cancellationToken) 
+                ?? throw new NotFoundException(nameof(WorkflowStepAssignment), id);
 
             // 2. Update properties
             assignment.AssignmentType = request.AssignmentType;

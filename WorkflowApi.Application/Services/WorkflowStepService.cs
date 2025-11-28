@@ -1,7 +1,7 @@
-// WorkflowStepService.cs
 using AutoMapper;
 using System.Text.Json;
 using WorkflowApi.Application.DTOs.WorkflowStep;
+using WorkflowApi.Application.Exceptions;
 using WorkflowApi.Application.Interfaces;
 using WorkflowApi.Domain.Entities;
 using WorkflowApi.Domain.Interfaces;
@@ -21,7 +21,7 @@ public class WorkflowStepService(
     {
         // 1. Check if route exists
         var route = await _unitOfWork.WorkflowRoutes.GetByIdAsync(request.RouteId, cancellationToken) 
-            ?? throw new KeyNotFoundException($"WorkflowRoute with Id {request.RouteId} not found");
+            ?? throw new NotFoundException(nameof(WorkflowRoute), request.RouteId);
 
         // 2. Check duplicate sequence number
         var exists = await _unitOfWork.WorkflowSteps.IsSequenceNoExistsAsync(
