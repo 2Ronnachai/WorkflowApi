@@ -34,6 +34,21 @@ namespace WorkflowApi.Infrastructure.Repositories
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
+        public async Task<List<WorkflowDelegation>> GetActiveDelegationsAsync(
+            string delegator,
+            DateTime currentDate,
+            CancellationToken cancellationToken = default)
+        {
+            return await _dbSet
+                .Where(d =>
+                    d.Delegator == delegator &&
+                    d.IsActive &&
+                    d.StartDate <= currentDate &&
+                    d.EndDate >= currentDate)
+                .OrderByDescending(d => d.CreatedAt)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<WorkflowDelegation?> GetActiveDelegationForRouteAsync(
             string delegator,
             int routeId,
@@ -110,6 +125,29 @@ namespace WorkflowApi.Infrastructure.Repositories
                 .Where(d => d.Delegatee == delegatee)
                 .OrderByDescending(d => d.CreatedAt)
                 .ToListAsync(cancellationToken);
+        }
+
+        public override async Task DeleteAsync(WorkflowDelegation entity, CancellationToken cancellationToken = default)
+        {
+            var delegation = await GetByIdAsync(entity.Id, cancellationToken) 
+                ?? throw new InvalidOperationException("WorkflowDelegation not found");
+
+            delegation.IsActive = false;
+            _dbSet.Update(delegation);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public override async Task DeleteRangeAsync(IEnumerable<WorkflowDelegation> entities, CancellationToken cancellationToken = default)
+        {
+            foreach (var entity in entities)
+            {
+                var delegation = await GetByIdAsync(entity.Id, cancellationToken) 
+                    ?? throw new InvalidOperationException($"WorkflowDelegation with Id {entity.Id} not found");
+                
+                delegation.IsActive = false;
+                _dbSet.Update(delegation);
+            }
+            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

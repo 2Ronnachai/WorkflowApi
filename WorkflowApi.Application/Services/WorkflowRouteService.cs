@@ -8,11 +8,9 @@ using WorkflowApi.Domain.Interfaces;
 namespace WorkflowApi.Application.Services;
 
 public class WorkflowRouteService(
-    IWorkflowRouteRepository routeRepository,
     IUnitOfWork unitOfWork,
     IMapper mapper) : IWorkflowRouteService
 {
-    private readonly IWorkflowRouteRepository _routeRepository = routeRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IMapper _mapper = mapper;
 
@@ -21,7 +19,7 @@ public class WorkflowRouteService(
         CancellationToken cancellationToken = default)
     {
         // 1. Check duplicate
-        var exists = await _routeRepository.IsRouteNameExistsAsync(
+        var exists = await _unitOfWork.WorkflowRoutes.IsRouteNameExistsAsync(
             request.RouteName, 
             request.DocumentType, 
             cancellationToken: cancellationToken);
@@ -36,7 +34,7 @@ public class WorkflowRouteService(
         var route = _mapper.Map<WorkflowRoute>(request);
 
         // 3. Save
-        await _routeRepository.AddAsync(route, cancellationToken);
+        await _unitOfWork.WorkflowRoutes.AddAsync(route, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // 4. Return response
@@ -49,14 +47,14 @@ public class WorkflowRouteService(
         CancellationToken cancellationToken = default)
     {
         // 1. Find existing
-        var route = await _routeRepository.GetByIdAsync(id, cancellationToken);
+        var route = await _unitOfWork.WorkflowRoutes.GetByIdAsync(id, cancellationToken);
         if (route == null)
         {
             throw new KeyNotFoundException($"WorkflowRoute with Id {id} not found");
         }
 
         // 2. Check duplicate (exclude current)
-        var exists = await _routeRepository.IsRouteNameExistsAsync(
+        var exists = await _unitOfWork.WorkflowRoutes.IsRouteNameExistsAsync(
             request.RouteName,
             route.DocumentType,
             excludeId: id,
@@ -74,7 +72,7 @@ public class WorkflowRouteService(
         route.IsActive = request.IsActive;
 
         // 4. Save
-        await _routeRepository.UpdateAsync(route, cancellationToken);
+        await _unitOfWork.WorkflowRoutes.UpdateAsync(route, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // 5. Return response
@@ -84,11 +82,11 @@ public class WorkflowRouteService(
     public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
         // 1. Find existing
-        var route = await _routeRepository.GetByIdAsync(id, cancellationToken) 
+        var route = await _unitOfWork.WorkflowRoutes.GetByIdAsync(id, cancellationToken) 
             ?? throw new KeyNotFoundException($"WorkflowRoute with Id {id} not found");
 
         // 2. Soft delete
-        await _routeRepository.DeleteAsync(route, cancellationToken);
+        await _unitOfWork.WorkflowRoutes.DeleteAsync(route, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
@@ -96,7 +94,7 @@ public class WorkflowRouteService(
         int id, 
         CancellationToken cancellationToken = default)
     {
-        var route = await _routeRepository.GetByIdAsync(id, cancellationToken);
+        var route = await _unitOfWork.WorkflowRoutes.GetByIdAsync(id, cancellationToken);
         return route == null ? null : _mapper.Map<WorkflowRouteResponse>(route);
     }
 
@@ -104,7 +102,7 @@ public class WorkflowRouteService(
         int id, 
         CancellationToken cancellationToken = default)
     {
-        var route = await _routeRepository.GetCompleteRouteAsync(id, cancellationToken);
+        var route = await _unitOfWork.WorkflowRoutes.GetCompleteRouteAsync(id, cancellationToken);
         return route == null ? null : _mapper.Map<WorkflowRouteDetailResponse>(route);
     }
 
@@ -112,21 +110,21 @@ public class WorkflowRouteService(
         string documentType, 
         CancellationToken cancellationToken = default)
     {
-        var route = await _routeRepository.GetByDocumentTypeAsync(documentType, cancellationToken);
+        var route = await _unitOfWork.WorkflowRoutes.GetByDocumentTypeAsync(documentType, cancellationToken);
         return route == null ? null : _mapper.Map<WorkflowRouteResponse>(route);
     }
 
     public async Task<IEnumerable<WorkflowRouteResponse>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
-        var routes = await _routeRepository.GetAllAsync(cancellationToken);
+        var routes = await _unitOfWork.WorkflowRoutes.GetAllAsync(cancellationToken);
         return _mapper.Map<IEnumerable<WorkflowRouteResponse>>(routes);
     }
 
     public async Task<IEnumerable<WorkflowRouteResponse>> GetActiveRoutesAsync(
         CancellationToken cancellationToken = default)
     {
-        var routes = await _routeRepository.GetActiveRoutesAsync(cancellationToken);
+        var routes = await _unitOfWork.WorkflowRoutes.GetActiveRoutesAsync(cancellationToken);
         return _mapper.Map<IEnumerable<WorkflowRouteResponse>>(routes);
     }
 }

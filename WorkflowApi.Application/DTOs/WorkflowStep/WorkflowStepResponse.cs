@@ -1,3 +1,4 @@
+using WorkflowApi.Application.DTOs.Condition;
 using WorkflowApi.Application.DTOs.WorkflowStepAssignment;
 
 namespace WorkflowApi.Application.DTOs.WorkflowStep

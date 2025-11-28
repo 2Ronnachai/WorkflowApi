@@ -9,6 +9,22 @@ namespace WorkflowApi.Infrastructure.Repositories
         private readonly WorkflowApiDbContext _context = context;
         private IDbContextTransaction? _transaction;
 
+        // Lazy initialization of repositories
+        private IWorkflowRouteRepository? _workflowRouteRepository;
+        private IWorkflowStepRepository? _workflowStepRepository;
+        private IWorkflowStepAssignmentRepository? _workflowStepAssignmentRepository;
+        private IWorkflowDelegationRepository? _workflowDelegationRepository;
+
+        // Repository properties
+        public IWorkflowRouteRepository WorkflowRoutes =>
+            _workflowRouteRepository ??= new WorkflowRouteRepository(_context);
+        public IWorkflowStepRepository WorkflowSteps =>
+            _workflowStepRepository ??= new WorkflowStepRepository(_context);
+        public IWorkflowStepAssignmentRepository WorkflowStepAssignments =>
+            _workflowStepAssignmentRepository ??= new WorkflowStepAssignmentRepository(_context);
+        public IWorkflowDelegationRepository WorkflowDelegations =>
+            _workflowDelegationRepository ??= new WorkflowDelegationRepository(_context);
+
         // Save changes to the database
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

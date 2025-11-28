@@ -15,6 +15,11 @@ namespace WorkflowApi.Application.DTOs.Resolution
         public string? PositionName { get; set; }
         public int? OrganizationalUnitId { get; set; }
         public string? OrganizationalUnitName { get; set; }
+
+        // Delegation Details
+        public string? Delegator { get; set; }
+        public bool IsDelegated { get; set; }
+        public string? DelegationReason { get; set; }
         
         // Resolution Details
         public string ResolutionMethod { get; set; } = string.Empty; 

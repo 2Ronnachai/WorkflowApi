@@ -10,6 +10,11 @@ namespace WorkflowApi.Domain.Interfaces
             string delegator,
             DateTime currentDate,
             CancellationToken cancellationToken = default);
+
+        Task<List<WorkflowDelegation>> GetActiveDelegationsAsync(
+            string delegator,
+            DateTime currentDate,
+            CancellationToken cancellationToken = default);
         
         Task<WorkflowDelegation?> GetActiveDelegationForRouteAsync(
             string delegator,

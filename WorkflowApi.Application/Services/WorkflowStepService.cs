@@ -9,13 +9,9 @@ using WorkflowApi.Domain.Interfaces;
 namespace WorkflowApi.Application.Services;
 
 public class WorkflowStepService(
-    IWorkflowStepRepository stepRepository,
-    IWorkflowRouteRepository routeRepository,
     IUnitOfWork unitOfWork,
     IMapper mapper) : IWorkflowStepService
 {
-    private readonly IWorkflowStepRepository _stepRepository = stepRepository;
-    private readonly IWorkflowRouteRepository _routeRepository = routeRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IMapper _mapper = mapper;
 
@@ -24,11 +20,11 @@ public class WorkflowStepService(
         CancellationToken cancellationToken = default)
     {
         // 1. Check if route exists
-        var route = await _routeRepository.GetByIdAsync(request.RouteId, cancellationToken) 
+        var route = await _unitOfWork.WorkflowRoutes.GetByIdAsync(request.RouteId, cancellationToken) 
             ?? throw new KeyNotFoundException($"WorkflowRoute with Id {request.RouteId} not found");
 
         // 2. Check duplicate sequence number
-        var exists = await _stepRepository.IsSequenceNoExistsAsync(
+        var exists = await _unitOfWork.WorkflowSteps.IsSequenceNoExistsAsync(
             request.RouteId,
             request.SequenceNo,
             cancellationToken: cancellationToken);
@@ -47,7 +43,7 @@ public class WorkflowStepService(
         step.ValidateParallelGroup();
 
         // 5. Save
-        await _stepRepository.AddAsync(step, cancellationToken);
+        await _unitOfWork.WorkflowSteps.AddAsync(step, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // 6. Return response
@@ -60,7 +56,7 @@ public class WorkflowStepService(
         CancellationToken cancellationToken = default)
     {
         // 1. Find existing
-        var step = await _stepRepository.GetByIdAsync(id, cancellationToken) 
+        var step = await _unitOfWork.WorkflowSteps.GetByIdAsync(id, cancellationToken) 
             ?? throw new KeyNotFoundException($"WorkflowStep with Id {id} not found");
 
         // 2. Update properties
@@ -83,7 +79,7 @@ public class WorkflowStepService(
         step.ValidateParallelGroup();
 
         // 4. Save
-        await _stepRepository.UpdateAsync(step, cancellationToken);
+        await _unitOfWork.WorkflowSteps.UpdateAsync(step, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // 5. Return response
@@ -93,14 +89,14 @@ public class WorkflowStepService(
     public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
         // 1. Find existing
-        var step = await _stepRepository.GetByIdAsync(id, cancellationToken);
+        var step = await _unitOfWork.WorkflowSteps.GetByIdAsync(id, cancellationToken);
         if (step == null)
         {
             throw new KeyNotFoundException($"WorkflowStep with Id {id} not found");
         }
 
         // 2. Check if it's referenced by other steps (ReturnStepId)
-        var referencingSteps = await _stepRepository.FindAsync(
+        var referencingSteps = await _unitOfWork.WorkflowSteps.FindAsync(
             s => s.ReturnStepId == id,
             cancellationToken);
 
@@ -111,7 +107,7 @@ public class WorkflowStepService(
         }
 
         // 3. Delete
-        await _stepRepository.DeleteAsync(step, cancellationToken);
+        await _unitOfWork.WorkflowSteps.DeleteAsync(step, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
@@ -119,7 +115,7 @@ public class WorkflowStepService(
         int id,
         CancellationToken cancellationToken = default)
     {
-        var step = await _stepRepository.GetByIdAsync(id, cancellationToken);
+        var step = await _unitOfWork.WorkflowSteps.GetByIdAsync(id, cancellationToken);
         return step == null ? null : _mapper.Map<WorkflowStepResponse>(step);
     }
 
@@ -127,7 +123,7 @@ public class WorkflowStepService(
         int id,
         CancellationToken cancellationToken = default)
     {
-        var step = await _stepRepository.GetStepWithAssignmentsAsync(id, cancellationToken);
+        var step = await _unitOfWork.WorkflowSteps.GetStepWithAssignmentsAsync(id, cancellationToken);
         return step == null ? null : _mapper.Map<WorkflowStepResponse>(step);
     }
 
@@ -135,7 +131,7 @@ public class WorkflowStepService(
         int routeId,
         CancellationToken cancellationToken = default)
     {
-        var steps = await _stepRepository.GetStepsByRouteIdAsync(routeId, cancellationToken);
+        var steps = await _unitOfWork.WorkflowSteps.GetStepsByRouteIdAsync(routeId, cancellationToken);
         return _mapper.Map<IEnumerable<WorkflowStepResponse>>(steps);
     }
 
@@ -144,7 +140,7 @@ public class WorkflowStepService(
         int parallelGroupId,
         CancellationToken cancellationToken = default)
     {
-        var steps = await _stepRepository.GetParallelStepsAsync(routeId, parallelGroupId, cancellationToken);
+        var steps = await _unitOfWork.WorkflowSteps.GetParallelStepsAsync(routeId, parallelGroupId, cancellationToken);
         return _mapper.Map<IEnumerable<WorkflowStepResponse>>(steps);
     }
 
@@ -153,7 +149,7 @@ public class WorkflowStepService(
         int currentSequenceNo,
         CancellationToken cancellationToken = default)
     {
-        var step = await _stepRepository.GetNextStepAsync(routeId, currentSequenceNo, cancellationToken);
+        var step = await _unitOfWork.WorkflowSteps.GetNextStepAsync(routeId, currentSequenceNo, cancellationToken);
         return step == null ? null : _mapper.Map<WorkflowStepResponse>(step);
     }
 
@@ -161,7 +157,7 @@ public class WorkflowStepService(
         int routeId,
         CancellationToken cancellationToken = default)
     {
-        var step = await _stepRepository.GetFinalStepAsync(routeId, cancellationToken);
+        var step = await _unitOfWork.WorkflowSteps.GetFinalStepAsync(routeId, cancellationToken);
         return step == null ? null : _mapper.Map<WorkflowStepResponse>(step);
     }
 }

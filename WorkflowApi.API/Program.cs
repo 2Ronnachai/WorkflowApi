@@ -51,6 +51,12 @@ builder.Services.AddScoped<IWorkflowStepService, WorkflowStepService>();
 builder.Services.AddScoped<IWorkflowStepAssignmentService, WorkflowStepAssignmentService>();
 builder.Services.AddScoped<IWorkflowResolutionService, WorkflowResolutionService>();
 
+// Other application services
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<IDelegationResolver, DelegationResolverService>();
+builder.Services.AddScoped<IConditionEvaluator, ConditionEvaluatorService>();
+builder.Services.AddScoped<IAssignmentResolver, AssignmentResolverService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

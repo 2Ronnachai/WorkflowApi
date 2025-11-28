@@ -7,13 +7,9 @@ using WorkflowApi.Domain.Interfaces;
 namespace WorkflowApi.Application.Services
 {
     public class WorkflowStepAssignmentService(
-        IWorkflowStepAssignmentRepository assignmentRepository,
-        IWorkflowStepRepository stepRepository,
         IUnitOfWork unitOfWork,
         IMapper mapper) : IWorkflowStepAssignmentService
     {
-        private readonly IWorkflowStepAssignmentRepository _assignmentRepository = assignmentRepository;
-        private readonly IWorkflowStepRepository _stepRepository = stepRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IMapper _mapper = mapper;
 
@@ -22,7 +18,7 @@ namespace WorkflowApi.Application.Services
             CancellationToken cancellationToken = default)
         {
             // 1. Check if step exists
-            var step = await _stepRepository.GetByIdAsync(request.StepId, cancellationToken) 
+            var step = await _unitOfWork.WorkflowSteps.GetByIdAsync(request.StepId, cancellationToken) 
                 ?? throw new KeyNotFoundException($"WorkflowStep with Id {request.StepId} not found");
 
             // 2. Map to Entity
@@ -32,7 +28,7 @@ namespace WorkflowApi.Application.Services
             assignment.Validate();
 
             // 4. Save
-            await _assignmentRepository.AddAsync(assignment, cancellationToken);
+            await _unitOfWork.WorkflowStepAssignments.AddAsync(assignment, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             // 5. Return response
@@ -45,7 +41,7 @@ namespace WorkflowApi.Application.Services
             CancellationToken cancellationToken = default)
         {
             // 1. Find existing
-            var assignment = await _assignmentRepository.GetByIdAsync(id, cancellationToken);
+            var assignment = await _unitOfWork.WorkflowStepAssignments.GetByIdAsync(id, cancellationToken);
             if (assignment == null)
             {
                 throw new KeyNotFoundException($"WorkflowStepAssignment with Id {id} not found");
@@ -62,7 +58,7 @@ namespace WorkflowApi.Application.Services
             assignment.Validate();
 
             // 4. Save
-            await _assignmentRepository.UpdateAsync(assignment, cancellationToken);
+            await _unitOfWork.WorkflowStepAssignments.UpdateAsync(assignment, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             // 5. Return response
@@ -72,11 +68,11 @@ namespace WorkflowApi.Application.Services
         public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
             // 1. Find existing
-            var assignment = await _assignmentRepository.GetByIdAsync(id, cancellationToken) 
+            var assignment = await _unitOfWork.WorkflowStepAssignments.GetByIdAsync(id, cancellationToken) 
                 ?? throw new KeyNotFoundException($"WorkflowStepAssignment with Id {id} not found");
 
             // 2. Delete
-            await _assignmentRepository.DeleteAsync(assignment, cancellationToken);
+            await _unitOfWork.WorkflowStepAssignments.DeleteAsync(assignment, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
@@ -84,7 +80,7 @@ namespace WorkflowApi.Application.Services
             int id,
             CancellationToken cancellationToken = default)
         {
-            var assignment = await _assignmentRepository.GetByIdAsync(id, cancellationToken);
+            var assignment = await _unitOfWork.WorkflowStepAssignments.GetByIdAsync(id, cancellationToken);
             return assignment == null ? null : _mapper.Map<WorkflowStepAssignmentResponse>(assignment);
         }
 
@@ -92,7 +88,7 @@ namespace WorkflowApi.Application.Services
             int stepId,
             CancellationToken cancellationToken = default)
         {
-            var assignments = await _assignmentRepository.GetAssignmentsByStepIdAsync(stepId, cancellationToken);
+            var assignments = await _unitOfWork.WorkflowStepAssignments.GetAssignmentsByStepIdAsync(stepId, cancellationToken);
             return _mapper.Map<IEnumerable<WorkflowStepAssignmentResponse>>(assignments);
         }
 
@@ -100,7 +96,7 @@ namespace WorkflowApi.Application.Services
             int stepId,
             CancellationToken cancellationToken = default)
         {
-            var assignments = await _assignmentRepository.GetPositionBasedAssignmentsAsync(stepId, cancellationToken);
+            var assignments = await _unitOfWork.WorkflowStepAssignments.GetPositionBasedAssignmentsAsync(stepId, cancellationToken);
             return _mapper.Map<IEnumerable<WorkflowStepAssignmentResponse>>(assignments);
         }
 
@@ -108,7 +104,7 @@ namespace WorkflowApi.Application.Services
             int stepId,
             CancellationToken cancellationToken = default)
         {
-            var assignments = await _assignmentRepository.GetEmployeeBasedAssignmentsAsync(stepId, cancellationToken);
+            var assignments = await _unitOfWork.WorkflowStepAssignments.GetEmployeeBasedAssignmentsAsync(stepId, cancellationToken);
             return _mapper.Map<IEnumerable<WorkflowStepAssignmentResponse>>(assignments);
         }
 
@@ -117,7 +113,7 @@ namespace WorkflowApi.Application.Services
             string nId,
             CancellationToken cancellationToken = default)
         {
-            var assignment = await _assignmentRepository.GetAssignmentByNIdAsync(stepId, nId, cancellationToken);
+            var assignment = await _unitOfWork.WorkflowStepAssignments.GetAssignmentByNIdAsync(stepId, nId, cancellationToken);
             return assignment == null ? null : _mapper.Map<WorkflowStepAssignmentResponse>(assignment);
         }
     }
