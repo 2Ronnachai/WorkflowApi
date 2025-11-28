@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using WorkflowApi.Application.Interfaces;
+using WorkflowApi.Application.Services;
 using WorkflowApi.Domain.Interfaces;
 using WorkflowApi.Infrastructure.Data;
 using WorkflowApi.Infrastructure.Repositories;
@@ -43,6 +44,12 @@ builder.Services.AddScoped<IWorkflowStepAssignmentRepository, WorkflowStepAssign
 
 // Dependency Injection for application services
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+// Specific application services
+builder.Services.AddScoped<IWorkflowRouteService, WorkflowRouteService>();
+builder.Services.AddScoped<IWorkflowStepService, WorkflowStepService>();
+builder.Services.AddScoped<IWorkflowStepAssignmentService, WorkflowStepAssignmentService>();
+builder.Services.AddScoped<IWorkflowResolutionService, WorkflowResolutionService>();
 
 var app = builder.Build();
 
