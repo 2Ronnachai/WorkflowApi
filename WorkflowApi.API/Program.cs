@@ -6,6 +6,7 @@ using WorkflowApi.Infrastructure.Data;
 using WorkflowApi.Infrastructure.Middleware;
 using WorkflowApi.Infrastructure.Repositories;
 using WorkflowApi.Infrastructure.Services;
+using WorkflowApi.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,11 +57,16 @@ builder.Services.AddScoped<IWorkflowStepService, WorkflowStepService>();
 builder.Services.AddScoped<IWorkflowStepAssignmentService, WorkflowStepAssignmentService>();
 builder.Services.AddScoped<IWorkflowResolutionService, WorkflowResolutionService>();
 
+builder.Services.AddScoped<IWorkflowRouteEnrichmentService, WorkflowRouteEnrichmentService>();
+
 // Other application services
-builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IDelegationResolver, DelegationResolverService>();
 builder.Services.AddScoped<IConditionEvaluator, ConditionEvaluatorService>();
 builder.Services.AddScoped<IAssignmentResolver, AssignmentResolverService>();
+
+
+// Add Infrastructure (includes EmployeeService)
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 

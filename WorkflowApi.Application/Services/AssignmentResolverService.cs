@@ -55,7 +55,7 @@ namespace WorkflowApi.Application.Services
                 AssignmentId = assignment.Id,
                 AssignmentType = assignment.AssignmentType.ToString(),
                 NId = delegationResult.FinalNId,
-                EmployeeName = employee?.Name ?? delegationResult.FinalNId,
+                EmployeeName = employee?.FullName ?? delegationResult.FinalNId,
                 Email = employee?.Email ?? string.Empty,
                 Delegator = delegationResult.IsDelegated ? originalNId : null,
                 IsDelegated = delegationResult.IsDelegated,
@@ -94,7 +94,7 @@ namespace WorkflowApi.Application.Services
                         assignment.StepId,
                         cancellationToken);
 
-                    var employeeName = emp.Name;
+                    var employeeName = emp.FullName;
                     var email = emp.Email;
 
                     if (delegationResult.IsDelegated)
@@ -105,7 +105,7 @@ namespace WorkflowApi.Application.Services
 
                         if (delegatedEmp != null)
                         {
-                            employeeName = delegatedEmp.Name;
+                            employeeName = delegatedEmp.FullName;
                             email = delegatedEmp.Email;
                         }
                     }
@@ -139,7 +139,7 @@ namespace WorkflowApi.Application.Services
                 OUResolutionMode.FollowOrigin => request.OrganizationalUnitIds,
 
                 OUResolutionMode.FollowInitiator =>
-                    [GetInitiatorOuId(request.CreatedBy)],
+                    GetInitiatorOuIds(request.CreatedBy),
 
                 OUResolutionMode.Fixed =>
                     [assignment.OrganizationalUnitId!.Value],
@@ -149,10 +149,10 @@ namespace WorkflowApi.Application.Services
             };
         }
 
-        private int GetInitiatorOuId(string createdBy)
+        private List<int> GetInitiatorOuIds(string createdBy)
         {
-            // TODO: ใช้ _employeeService.GetEmployeeOuIdAsync(createdBy)
-            return 0; // Mock
+            var employeeOuIds = _employeeService.GetEmployeeOuIdsAsync(createdBy).Result;
+            return employeeOuIds;
         }
 
         private static string GetResolutionMethod(OUResolutionMode mode)

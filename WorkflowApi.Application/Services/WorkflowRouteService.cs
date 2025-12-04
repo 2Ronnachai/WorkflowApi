@@ -8,9 +8,11 @@ using WorkflowApi.Domain.Interfaces;
 namespace WorkflowApi.Application.Services;
 
 public class WorkflowRouteService(
+    IWorkflowRouteEnrichmentService enrichmentService,
     IUnitOfWork unitOfWork,
     IMapper mapper) : IWorkflowRouteService
 {
+    private readonly IWorkflowRouteEnrichmentService _enrichmentService = enrichmentService;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IMapper _mapper = mapper;
 
@@ -100,8 +102,21 @@ public class WorkflowRouteService(
         int id, 
         CancellationToken cancellationToken = default)
     {
-        var route = await _unitOfWork.WorkflowRoutes.GetCompleteRouteAsync(id, cancellationToken);
-        return route == null ? null : _mapper.Map<WorkflowRouteDetailResponse>(route);
+        // 1. Get data from database
+            var route = await _unitOfWork.WorkflowRoutes.GetCompleteRouteAsync(
+                id, 
+                cancellationToken);
+            
+            if (route == null)
+                return null;
+
+            // 2. Map to response
+            var response = _mapper.Map<WorkflowRouteDetailResponse>(route);
+
+            // 3. Enrich with external data
+            await _enrichmentService.EnrichRouteDetailAsync(response, cancellationToken);
+
+            return response;
     }
 
     public async Task<WorkflowRouteResponse?> GetByDocumentTypeAsync(
