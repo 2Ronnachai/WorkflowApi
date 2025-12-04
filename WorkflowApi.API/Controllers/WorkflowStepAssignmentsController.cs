@@ -6,7 +6,7 @@ namespace WorkflowApi.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class WorkflowStepAssignmentController(
+public class WorkflowStepAssignmentsController(
     IWorkflowStepAssignmentService assignmentService) : ControllerBase
 {
     private readonly IWorkflowStepAssignmentService _assignmentService = assignmentService;

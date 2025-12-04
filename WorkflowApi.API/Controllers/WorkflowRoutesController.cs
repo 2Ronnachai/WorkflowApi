@@ -6,7 +6,7 @@ namespace WorkflowApi.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class WorkflowRouteController(IWorkflowRouteService workflowRouteService) : ControllerBase
+public class WorkflowRoutesController(IWorkflowRouteService workflowRouteService) : ControllerBase
 {
     private readonly IWorkflowRouteService _workflowRouteService = workflowRouteService;
 

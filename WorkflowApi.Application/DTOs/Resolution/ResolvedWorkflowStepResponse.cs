@@ -19,7 +19,7 @@ namespace WorkflowApi.Application.DTOs.Resolution
         // Final Step
         public bool IsFinalStep { get; set; }
         
-        // Resolved Assignees (ผลลัพธ์สำคัญ!)
+        // Resolved Assignees
         public List<ResolvedAssigneeResponse> Assignees { get; set; } = new();
         
         // Next Step Info (if conditional)

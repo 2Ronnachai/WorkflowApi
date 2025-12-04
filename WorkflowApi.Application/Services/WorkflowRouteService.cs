@@ -1,4 +1,3 @@
-// WorkflowRouteService.cs
 using AutoMapper;
 using WorkflowApi.Application.DTOs.WorkflowRoute;
 using WorkflowApi.Application.Exceptions;
@@ -66,6 +65,7 @@ public class WorkflowRouteService(
 
         // 3. Update properties
         route.RouteName = request.RouteName;
+        route.DocumentType = request.DocumentType;
         route.Description = request.Description;
         route.IsActive = request.IsActive;
 
