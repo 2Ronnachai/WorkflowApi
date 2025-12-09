@@ -28,13 +28,38 @@ builder.Services.AddHttpContextAccessor(); // For ICurrentUserService
 // AutoMapper Configuration
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+// CORS Configuration
+var corsSettings = builder.Configuration.GetSection("Cors");
+var allowedOrigins = corsSettings.GetSection("AllowedOrigins").Get<string[]>() ?? [];
+var allowAnyOrigin = corsSettings.GetValue<bool>("AllowAnyOrigin");
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        if (allowAnyOrigin)
+        {
+            // Development: Allow any origin
+            policy.SetIsOriginAllowed(_ => true)
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        }
+        else if (allowedOrigins.Length > 0)
+        {
+            // Production: Restrict to specified origins
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        }
+        else
+        {
+            // Fallback: No origins allowed
+            throw new InvalidOperationException(
+                "CORS configuration is required!"
+            );
+        }
     });
 });
 
@@ -70,10 +95,10 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseCors();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseCors();
     app.MapOpenApi();
 }
 
